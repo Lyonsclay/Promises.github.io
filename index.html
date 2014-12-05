@@ -1,0 +1,325 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Promises.GitHub.io by Lyonsclay</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">Promises.GitHub.io</h1>
+        <p class="header">JavaScript Promises Tutorial</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/Lyonsclay/Promises.github.io/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/Lyonsclay/Promises.github.io/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/Lyonsclay/Promises.github.io">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/Lyonsclay">Lyonsclay</a></p>
+
+
+      </header>
+      <section>
+        <p>EcmaScript6 has introduced a native Promises spec which "promises" to make asynchronous chaining much simpler.</p>
+
+<p>Promises are a new pattern to handle asynchronous JavaScript functions. They provide a way of chaining multiple asynchronous functions that allows them to operate sequentially and pass values to each other. This means that each function will wait for the previous function to pass a value and then can operate on that value.</p>
+
+<p>This is a relatively new pattern and might not work out of the box on older browsers.
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#AutoCompatibilityTable">Browser Compatability</a></p>
+
+<p>Despite the simplicity of the Promise pattern I've found that the descriptions and numerous tutorials on the web to be insufficient for completely grasping the concept. One of the failings I have observed is the general attempt to learn Javascript patterns with contrived examples.</p>
+
+<p>Instead I am going illustrate a solution to an actual problem: capturing the latitude and longitude of a broswer with the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/Using_geolocation">HTML5 Geolocation Api</a> and then turning that into a physical address. If you are already familiar with asynchronous JavaScript code feel free to skip to the <a href="#promises">Promises</a> section.</p>
+
+<ul>
+<li><a href="#getting_started">Getting Started</a></li>
+<li><a href="#synchronous_code">Synchronous Code</a></li>
+<li><a href="#asynchronous_code">Asynchronous Code</a></li>
+<li><a href="#promises">Promises</a></li>
+<li><a href="#geolocation_method">Geolocation Method</a></li>
+<li><a href="#geolocation_as_promise">Geolocation Promise</a></li>
+<li>
+<a href="#reverse_geocoding">Reverse Geocoding</a>
+## Getting Started</li>
+</ul>
+
+<p>You can checkout my <a href="https://github.com/Lyonsclay/Promises-Promises.git">Github repo</a> it has all the function defintions for this tutorial. I've included a simple ruby server that will become necessary when the HTML5 geolocation feature is used.</p>
+
+<h2>
+<a id="synchronous-code" class="anchor" href="#synchronous-code" aria-hidden="true"><span class="octicon octicon-link"></span></a>Synchronous Code</h2>
+
+<p>A typical javascript function definition is an example of synchronous code. Synchronous code is run sequentially from one line to the next and blocks execution of further tasks until the present routine is complete. Synchronous code can return a value to the function caller with the <code>return</code> statement.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-st">function</span> <span class="pl-en">output</span>(<span class="pl-vpf">value</span>) {
+    <span class="pl-k">return</span> value;
+}
+
+<span class="pl-s">var</span> sync <span class="pl-k">=</span> output(<span class="pl-s1"><span class="pl-pds">'</span>jumbalaya<span class="pl-pds">'</span></span>);
+<span class="pl-en">console</span><span class="pl-s3">.log</span>(sync <span class="pl-k">===</span> <span class="pl-s1"><span class="pl-pds">'</span>jumbalaya<span class="pl-pds">'</span></span>);   <span class="pl-c">// true</span></pre></div>
+
+<h2>
+<a id="asynchronous-code" class="anchor" href="#asynchronous-code" aria-hidden="true"><span class="octicon octicon-link"></span></a>Asynchronous Code</h2>
+
+<p>Now let's look at an asynchronous function using <a href="https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers.setTimeout">setTimeout</a> as the example. With an asynchronous function you can't capture the output directly with a return statement.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-s">var</span> async <span class="pl-k">=</span> <span class="pl-s3">setTimeout</span>(<span class="pl-st">function</span> () {
+    <span class="pl-en">console</span><span class="pl-s3">.log</span>(<span class="pl-s1"><span class="pl-pds">'</span>stay classy<span class="pl-pds">'</span></span>);
+    <span class="pl-k">return</span> <span class="pl-s1"><span class="pl-pds">'</span>to the depths<span class="pl-pds">'</span></span>;
+}, <span class="pl-c1">1500</span>);
+
+<span class="pl-en">console</span><span class="pl-s3">.log</span>(async <span class="pl-k">===</span> <span class="pl-s1"><span class="pl-pds">'</span>to the depths<span class="pl-pds">'</span></span>);   <span class="pl-c">// false</span></pre></div>
+
+<p>The return statement inside the <code>setTimeout</code> is actually ignored and <code>async</code> is set to equal the numerical id of the timeout. This id can then be used with the <code>clearTimeout</code> function to end an active <code>setTimeout</code>timer.</p>
+
+<p>One way of capturing a value from a <code>setTimeout</code> is to define a global variable so that all functions can access it.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-s">var</span> deffered <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">'</span>bric a brac<span class="pl-pds">'</span></span>;   <span class="pl-c">// global variable</span>
+<span class="pl-s">var</span> passingOut <span class="pl-k">=</span> <span class="pl-s3">setTimeout</span>(<span class="pl-st">function</span> () {
+    deffered <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">'</span>captured value<span class="pl-pds">'</span></span>;
+    <span class="pl-en">console</span><span class="pl-s3">.log</span>(<span class="pl-s1"><span class="pl-pds">'</span>check deffered now<span class="pl-pds">'</span></span>);
+}, <span class="pl-c1">3000</span>);
+
+<span class="pl-en">console</span><span class="pl-s3">.log</span>(deffered <span class="pl-k">===</span> <span class="pl-s1"><span class="pl-pds">"</span>captured value<span class="pl-pds">"</span></span>);    <span class="pl-c">//false</span></pre></div>
+
+<p>The global variable can also be set inside a function.<a href="https://developer.mozilla.org/en-US/docs/Web/API/Window">window</a></p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-st">function</span> <span class="pl-en">setGlobal</span> () {
+    <span class="pl-s3">window</span>.greeting <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">'</span>namaste<span class="pl-pds">'</span></span>;
+}</pre></div>
+
+<p>Either way it is declared a global variable refers to a variable in the <a href="http://www.ecma-international.org/ecma-262/5.1/#sec-10.2.3">global execution context</a> which means that all functions declared in the immediate scope and it's descendants have access to a global variable.</p>
+
+<p>Synchronous functions can be chained together so that the output of one function is the input of the next. This works because all functions declared inside an outer function have access to it's variables.<a href="http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/">scope</a></p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-s1"><span class="pl-pds">'</span>run<span class="pl-pds">'</span></span>.<span class="pl-s3">concat</span>(<span class="pl-s1"><span class="pl-pds">'</span> away<span class="pl-pds">'</span></span>).<span class="pl-s3">bold</span>(); <span class="pl-c">// &lt;b&gt;run away&lt;/b&gt;</span></pre></div>
+
+<p>To chain asynchronous functions together they have to be nested so that they are forced to operate in sequence.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-st">function</span> <span class="pl-en">chains</span>() {
+    <span class="pl-s">var</span> arcane <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">'</span>chains<span class="pl-pds">'</span></span>;
+    <span class="pl-s3">setTimeout</span>(<span class="pl-st">function</span> () {        <span class="pl-c">// outer function</span>
+        arcane <span class="pl-k">+=</span> <span class="pl-s1"><span class="pl-pds">'</span> of <span class="pl-pds">'</span></span>;
+        <span class="pl-s3">setTimeout</span>(<span class="pl-st">function</span> () {    <span class="pl-c">// inner function</span>
+            arcane <span class="pl-k">+=</span> <span class="pl-s1"><span class="pl-pds">'</span>mephistopheles<span class="pl-pds">'</span></span>;
+            <span class="pl-en">console</span><span class="pl-s3">.log</span>(arcane)
+        }, <span class="pl-c1">700</span>);
+    }, <span class="pl-c1">700</span>);
+    <span class="pl-k">return</span> arcane;
+}</pre></div>
+
+<p>The execution of each nested asynchronous function is contingent upon the completion of an event called by the outer function that encompasses it. In the above case that event is a delay of 700 milliseconds. As with any function the code encapsulated executes sequentially. By nesting a function we wait for the outer function to complete before executing the lines of code in the inner function.</p>
+
+<p>If we set a variable equal to the output of the function <code>chains</code> that variable will still have the value given in the initial declaration <code>var arcane = "chains"</code>. Each time an asynchronous function like <code>setTimeout</code> is called it gets processed in it's own time and doesn't block subsequent code. That means that the value for <code>arcane</code> has returned before the functions passed to the <code>setTimeout</code>s adds the text "of" and "mephistopheles" respectively to <code>arcane</code>.</p>
+
+<h2>
+<a id="promises" class="anchor" href="#promises" aria-hidden="true"><span class="octicon octicon-link"></span></a>Promises</h2>
+
+<p>The native EcmaScript6 Promise is based off of the <a href="https://promisesaplus.com">Promises/A+</a> proposal which has a nice clear specification that is worth checking out.</p>
+
+<p>Here is a simple promise to illustrate the pattern.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-s">var</span> basicPromise <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Promise</span>(<span class="pl-st">function</span> (<span class="pl-vpf">resolve</span>, <span class="pl-vpf">reject</span>) {
+        <span class="pl-s">var</span> basicOperation <span class="pl-k">=</span> <span class="pl-c1">true</span>;
+    <span class="pl-k">if</span> (basicOperation) {
+        resolve(<span class="pl-s1"><span class="pl-pds">"</span>play to win<span class="pl-pds">"</span></span>);
+    } <span class="pl-k">else</span> {
+        reject(<span class="pl-s1"><span class="pl-pds">"</span>crash and burn<span class="pl-pds">"</span></span>);
+    }
+});</pre></div>
+
+<p>If you enter <code>basicPromise</code> in the console you will see what a Promise object looks like and what value it has resolved to.</p>
+
+<p>If you get an error stateing that Promise is not defined your browser may not support Promises( currently no version of IE does). Consider updating your browser or include the polyfill recommended by <a href="https://www.promisejs.org">Forbes Lindesay</a>.</p>
+
+<div class="highlight highlight-javascript"><pre>basicPromise <span class="pl-c">// Promise {[[PromiseStatus]]: "resolved", [[PromiseValue]]: "play to win"}</span></pre></div>
+
+<p>A promise takes a function with two arguments, which by convention are "resolve" and "reject". These names can be anything, but it's better to stick with convention. Inside the function body will live the core operations of the Promise, in this case it is simply setting the variable <code>basicOperation</code> to <code>true</code>. After the core operations are concluded you are responsible for calling "resolve" or "reject", otherwise the Promise will forever have the status of "pending". Both "resolve" and "reject" take an argument which can be any object that then becomes the PromiseValue. It's important to note that while you can name "resolve" and "reject" anything you want these are not functions you define, but are rather functions defined on the Promise prototype that you call with arguments that you provide.</p>
+
+<p>A promise can be "pending", "resolved", or "rejected". Once a Promise has resolved it's state to "resolved" or "rejected" it never changes status after that. If you want to invoke the same operation multiple times and use the Promise pattern then just return a Promise from a function.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-st">function</span> <span class="pl-en">evenOdds</span>() {
+    <span class="pl-k">return</span> <span class="pl-k">new</span> <span class="pl-en">Promise</span>(<span class="pl-st">function</span> (<span class="pl-vpf">resolve</span>, <span class="pl-vpf">reject</span>) {
+        <span class="pl-k">if</span> (<span class="pl-s3">Math</span>.<span class="pl-s3">random</span>() <span class="pl-k">&gt;</span> .<span class="pl-c1">5</span>) {
+            resolve(<span class="pl-s1"><span class="pl-pds">'</span>beautiful<span class="pl-pds">'</span></span>);
+        } <span class="pl-k">else</span> {
+            reject(<span class="pl-s1"><span class="pl-pds">'</span>horrific<span class="pl-pds">'</span></span>)
+        }
+    });
+}</pre></div>
+
+<p>If you enter <code>evenOdds();</code> multiple times in the console the <code>PromiseValue</code>will equal "resolve" or "reject" randomly. Now let's say we want to pass the <code>PromiseValue</code> to a function that does something with it's value. For that we are provided with a <code>then</code> method that allows us to chain functions so that they perform sequentially and are able to pass values to subsquent functions.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-st">function</span> <span class="pl-en">get</span>(<span class="pl-vpf">value</span>) {
+    <span class="pl-en">console</span><span class="pl-s3">.log</span>(<span class="pl-s1"><span class="pl-pds">'</span>everything is <span class="pl-pds">'</span></span> <span class="pl-k">+</span> value);
+}
+
+<span class="pl-st">function</span> <span class="pl-en">throwOut</span>(<span class="pl-vpf">value</span>) {
+    <span class="pl-en">console</span><span class="pl-s3">.log</span>(<span class="pl-s1"><span class="pl-pds">'</span>so wrong <span class="pl-pds">'</span></span> <span class="pl-k">+</span> value);
+}
+
+evenOdds().then(get, throwOut);</pre></div>
+
+<p>Try entering <code>evenOdds().then(get, throwOut);</code> multiple times and you will observe the value geting passed randomly to <code>get</code> or <code>throwOut</code>.</p>
+
+<p>According to the <a href="">Promises A+</a> specification the <code>then</code> method receives two arguments that are ignored if they are not functions. The <code>then</code> method passes the <code>promiseValue</code> to the first function if it is resolved or the second method if the promise has rejected.</p>
+
+<p>The term 'thenable' refers to an object or function that has a <code>then</code> method. This is the most essential characteristic of a Promise and is what allows for Promises of different libraries to interact. There is some speculation that JavaScript asynchronous functions that are currently using the Callback pattern will be adapted to the Promise pattern.</p>
+
+<p>What if you want to pass a value from <code>get</code> to another function to operate on? A simple way to do this is to add a return statement which shares a value down the chain.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-st">function</span> <span class="pl-en">give</span>(<span class="pl-vpf">val</span>) {
+    <span class="pl-k">return</span> <span class="pl-s1"><span class="pl-pds">'</span>so extremely <span class="pl-pds">'</span></span> <span class="pl-k">+</span> val;
+}
+
+evenOdds().then(give, throwOut).then(get, throwOut);</pre></div>
+
+<h2>
+<a id="promise-land" class="anchor" href="#promise-land" aria-hidden="true"><span class="octicon octicon-link"></span></a>Promise Land</h2>
+
+<p>So we are now passing a series of asynchronous functions through the Promise interface; this doesn't seem right. It doesn't seem right because we are in the Promise Land and all code in Promise Land is clean and beautiful. What I like about the Promise object is that</p>
+
+<p>A more readable homogenous way of doing it is to pass a promise generator through a <code>then</code> statement.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-st">function</span> <span class="pl-en">got</span>(<span class="pl-vpf">value</span>) {
+    <span class="pl-k">return</span> <span class="pl-k">new</span> <span class="pl-en">Promise</span>(<span class="pl-st">function</span> (<span class="pl-vpf">resolve</span>, <span class="pl-vpf">reject</span>) {
+        <span class="pl-k">if</span> (value) {
+            value <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">'</span>so extremely <span class="pl-pds">'</span></span> <span class="pl-k">+</span> value;
+            resolve(value);
+        } <span class="pl-k">else</span> {
+            reject(<span class="pl-s1"><span class="pl-pds">'</span>sorry<span class="pl-pds">'</span></span>);
+        }
+    });
+}
+
+evenOdds().then(got).then(give, throwOut);</pre></div>
+
+<h2>
+<a id="geolocation-method" class="anchor" href="#geolocation-method" aria-hidden="true"><span class="octicon octicon-link"></span></a>Geolocation Method</h2>
+
+<p>HTML5 has a native function <a href="https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/Using_geolocation">getCurrentPosition</a> to acquire geolocation data from a particular piece of hardware running a browser such as a laptop or mobile device. You can test your browser's ability use the HTML5 geolocation service with this <a href="https://mdn.mozillademos.org/en-US/docs/Web/API/Geolocation/Using_geolocation%24samples/Geolocation_Live_Example?revision=635775">demo app</a> provided by Mozilla.</p>
+
+<p>In order to get location data from a device we use the asynchronous method <code>getCurrentPosition</code> which is called on the <code>navigator.geolocation</code> object and takes two callbacks <code>success</code> and <code>error</code>. <a href="http://javascriptissexy.com/understand-javascript-callback-functions-and-use-them/">Callbacks</a> are functions that get passed into a host function in order to be called after some operations.</p>
+
+<p>The Callback pattern is perhaps the most widely used design for asynchronous code. The essential mechanism of passing a function as another functions parameter is the fundamental way to interact with events that are non blocking. In fact, the first argument of <a href="#asynchronous_code">setTimeout</a> can be considered a callback function for all intensive purposes. What's different is that <code>getCurrentPosition</code>takes an optional second callback, <code>error</code>, which is triggered if <code>getCurrentPosition</code> can't get geolocation data for the device it is running on.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-s3">navigator</span>.geolocation.getCurrentPosition(success, error, options)</pre></div>
+
+<p>So now let's implement a <code>find</code> method and define a <code>success</code> and <code>error</code> function with some standard <code>options</code> for the output data.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-st">function</span> <span class="pl-en">find</span>() {
+    <span class="pl-s3">navigator</span>.geolocation.getCurrentPosition(success, error, options);
+}
+
+<span class="pl-st">function</span> <span class="pl-en">success</span>(<span class="pl-vpf">position</span>) {
+    <span class="pl-en">console</span><span class="pl-s3">.log</span>(<span class="pl-s1"><span class="pl-pds">"</span>Your current position is;<span class="pl-pds">"</span></span>);
+    <span class="pl-en">console</span><span class="pl-s3">.log</span>(position.<span class="pl-sc">coords</span>.latitude, position.<span class="pl-sc">coords</span>.longitude);
+}
+
+<span class="pl-st">function</span> <span class="pl-en">error</span>() {
+    <span class="pl-s3">alert</span>(<span class="pl-s1"><span class="pl-pds">"</span>Sorry, no position available.<span class="pl-pds">"</span></span>);
+}
+
+<span class="pl-c">// These are some standard options, it's actually not required</span>
+<span class="pl-c">// to provide the parameter of options.</span>
+<span class="pl-s">var</span> options <span class="pl-k">=</span> {
+    enableHighAccuracy<span class="pl-k">:</span> <span class="pl-c1">true</span>,
+    maximumAge        <span class="pl-k">:</span> <span class="pl-c1">30000</span>,
+    timeout           <span class="pl-k">:</span> <span class="pl-c1">27000</span>
+};</pre></div>
+
+<p>If you enter <code>find();</code> in your developer's console you will get an output of your current location assuming you are on a the modern browser and have given it permission to check location.</p>
+
+<p>Our next challenge will be to take the latitude and longitude coordinates and turn that data into a physical address. Before we do this we are going to turn the <code>find</code> function in to a Promise in preparation of chaining the two functions together.</p>
+
+<h2>
+<a id="geolocation-promise" class="anchor" href="#geolocation-promise" aria-hidden="true"><span class="octicon octicon-link"></span></a>Geolocation Promise</h2>
+
+<p>First off we'll create a Promise constructor for the geolocation service. If you recall the function to acquire geolocation data takes a <code>success</code> and <code>error</code> callback.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-s3">navigator</span>.geolocation.getCurrentPosition(success, error, options)</pre></div>
+
+<p>This makes it easy to pipe into a Promise as <code>success</code> and <code>error</code> correspond to <code>resolve</code> and <code>reject</code>. For the sake of simplicity we will ignore the <code>options</code> argument.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-st">function</span> <span class="pl-en">geoLocate</span>() {
+    <span class="pl-k">return</span> <span class="pl-k">new</span> <span class="pl-en">Promise</span>(<span class="pl-st">function</span>(<span class="pl-vpf">resolve</span>, <span class="pl-vpf">reject</span>) {
+        <span class="pl-s3">navigator</span>.geolocation.getCurrentPosition(resolve, reject);
+    });
+}</pre></div>
+
+<p>Let's create a function that turns the geolocation object into latitude and longitude and wrap that function into a Promise.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-st">function</span> <span class="pl-en">getCoordinates</span>(<span class="pl-vpf">position</span>) {
+    <span class="pl-k">return</span> <span class="pl-k">new</span> <span class="pl-en">Promise</span>(<span class="pl-st">function</span>(<span class="pl-vpf">resolve</span>, <span class="pl-vpf">reject</span>) {
+        <span class="pl-k">if</span> (position) {
+            coords <span class="pl-k">=</span> [position.<span class="pl-sc">coords</span>.latitude, position.<span class="pl-sc">coords</span>.longitude];
+            resolve(coords);
+        } <span class="pl-k">else</span> {
+            reject(position);
+        }
+    });
+}</pre></div>
+
+<p>Now let's create a fresh logging function <code>grab</code> to display the result and for good measure we'll recycle <code>throwOut</code> so we have an error function to pass.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-st">function</span> <span class="pl-en">grab</span>(<span class="pl-vpf">val</span>) {
+    <span class="pl-en">console</span><span class="pl-s3">.log</span>(val);
+}
+
+<span class="pl-st">function</span> <span class="pl-en">throwOut</span>(<span class="pl-vpf">value</span>) {
+    <span class="pl-en">console</span><span class="pl-s3">.log</span>(<span class="pl-s1"><span class="pl-pds">"</span>so wrong <span class="pl-pds">"</span></span> <span class="pl-k">+</span> value);
+}
+
+geoLocate().then(getCoordinates).then(grab, throwOut);</pre></div>
+
+<h2>
+<a id="reverse-geocoding" class="anchor" href="#reverse-geocoding" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reverse Geocoding</h2>
+
+<p>Reverse Geocoding is the process of getting a physical address from latitude and longitude coordinates.
+We are going to use the <a href="https://developers.google.com/maps/documentation/javascript/">Google Maps JavaScript API</a> to perform the <a href="https://developers.google.com/maps/documentation/javascript/examples/geocoding-reverse">Reverse Geocoding</a>.</p>
+
+<p>To start with you have to include the script that contains the Google Maps Javascript code for connection to the API.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-k">&lt;</span>script type<span class="pl-k">=</span><span class="pl-s1"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span> src<span class="pl-k">=</span><span class="pl-s1"><span class="pl-pds">"</span>https://maps.googleapis.com/maps/api/js?sensor=false<span class="pl-pds">"</span></span><span class="pl-k">&gt;&lt;</span>/script<span class="pl-k">&gt;</span></pre></div>
+
+<p>The Google Maps API is fairly extensive performing many services which we are only using a small portion of.</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-st">function</span> <span class="pl-en">reverseGeocode</span>(<span class="pl-vpf">coords</span>) {
+    <span class="pl-s">var</span> geocoder <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">google.maps</span>.Geocoder(),
+        coordinates <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">google.maps</span>.LatLng(coords[<span class="pl-c1">0</span>], coords[<span class="pl-c1">1</span>]),
+        setting <span class="pl-k">=</span> { <span class="pl-s1"><span class="pl-pds">'</span>latLng<span class="pl-pds">'</span></span><span class="pl-k">:</span> coordinates };
+    geocoder.geocode(setting, <span class="pl-st">function</span> (<span class="pl-vpf">results</span>, <span class="pl-vpf">status</span>) {
+        <span class="pl-k">if</span> (status <span class="pl-k">===</span> <span class="pl-s1"><span class="pl-pds">'</span>OK<span class="pl-pds">'</span></span>) {
+            <span class="pl-s">var</span> address <span class="pl-k">=</span> (results[<span class="pl-c1">0</span>].formatted_address);
+            <span class="pl-en">console</span><span class="pl-s3">.log</span>(address);
+        } <span class="pl-k">else</span> {
+            <span class="pl-s3">alert</span>(status);
+        }
+    });
+}</pre></div>
+
+<p><a href="http://blog.parse.com/2013/01/29/whats-so-great-about-javascript-promises/">http://blog.parse.com/2013/01/29/whats-so-great-about-javascript-promises/</a>
+<a href="http://stackoverflow.com/questions/4862193/javascript-global-variables">http://stackoverflow.com/questions/4862193/javascript-global-variables</a>
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Synchronous_and_Asynchronous_Requests">https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Synchronous_and_Asynchronous_Requests</a>
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/this">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/this</a>
+<a href="http://fuqua.io/blog/2014/02/native-javascript-promises-and-browser-apis/">http://fuqua.io/blog/2014/02/native-javascript-promises-and-browser-apis/</a></p>
+
+<p>"Function statement should only be done at the top level." - Douglass Crockford [Because of hoisting?]</p>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
+  </body>
+</html>
