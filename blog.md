@@ -314,4 +314,4 @@ https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Synchronous_and_
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/this
 http://fuqua.io/blog/2014/02/native-javascript-promises-and-browser-apis/
 
-"Function statement should only be done at the top level." - Douglass Crockford [Because of hoisting?]
+"Function statement should only be done at the top level." - Douglass Crockford [Because of hoisting?]:octocat:
