@@ -1,0 +1,53 @@
+.highlight.highlight-javascript pre {
+	color: #d9b026;
+	color: #cc7d35;
+	color: #859a6e;
+
+	border-radius: 10px;
+	/*overflow: hidden;*/
+	box-shadow: 5px 3px 3px 15px #e7e7e7;
+	overflow-wrap: break-word;
+	background: #3c4036;
+}
+
+.pl-st {
+	color: #a0455a;
+}
+
+.pl-en {
+	color: #859a6e;
+	color: #cc7d35;
+}
+
+.pl-vpf {
+	color: #007b6c;
+}
+
+.pl-k {
+	color: #6b717d;
+}
+
+.pl-s {
+	color: #3d778d;
+}
+
+.pl-s1 {
+	color: #d5a79c;
+}
+
+.pl-pds {
+	color: #d4a234;
+}
+
+.pl-s3 {
+	color: #b6493c;
+}
+
+.pl-c {
+	color: #9792a3;
+}
+
+.pl-c1 {
+	color: #9cb032;
+}
+
