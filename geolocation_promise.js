@@ -1,98 +1,37 @@
-function find() {
-	navigator.geolocation.getCurrentPosition(success, error, options);
-}
+/*jslint browser: true, devel: true */
+/*jslint unparam: true*/
 
-function success(position) {
-	console.log("Your current position is;");
-    console.log(position.coords.latitude, position.coords.longitude);
-}
+// In order to use Geolocation services in the browser
+// from this code you must run a local server.
+// Type the following from the command line in the root folder;
+// ruby simple_server.rb
 
-function error() {
-    alert("Sorry, no position available.");
-}
-
-var options = {
-    enableHighAccuracy: true,
-    maximumAge        : 30000,
-    timeout           : 27000
-};
-
-//////////////////////////////////////////
-
-
-// var sendLocation = function (geo) {
-//     var coordinates = geo;
-//     alert(coordinates);
-//     return coordinates;
-// }
-
-// var displayLocation = function(coords) {
-//     var locationJSON = JSON.stringify(coords)
-//     demo.insertAdjacentHTML('beforeend', "<p>" + locationJSON + "</p>");
-// }
-
-
-
-// Convert geolocation service to promise
-
+// Convert geolocation service to Promise;
 function geoLocate() {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         navigator.geolocation.getCurrentPosition(resolve, reject);
     });
 }
 
+var where = geoLocate();
 
-
+// Extract coordinates from Geoposition object;
 function getCoordinates(position) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         if (position) {
-            coords = [position.coords.latitude, position.coords.longitude];
-            resolve(coords);
+            var coordinates = [position.coords.latitude, position.coords.longitude];
+            resolve(coordinates);
         } else {
             reject(position);
         }
     });
 }
 
-// reverse geocode using google maps api
-
-function reverseGeocode(coords) {
-    var geocoder = new google.maps.Geocoder(),
-        coordinates = new google.maps.LatLng(coords[0], coords[1]),
-        setting = { 'latLng': coordinates };
-    geocoder.geocode(setting, function (results, status) {
-        if (status === 'OK') {
-            var address = (results[0].formatted_address);
-            console.log(address);
-        } else {
-            alert(status);
-        }
-    });
-}
-
-function getAddress(coords){
-    return new Promise(function (resolve, reject) {
-        var geocoder = new google.maps.Geocoder();
-        var coordinates = new google.maps.LatLng(coords[0], coords[1]);
-        var setting = { 'latLng': coordinates };
-        geocoder.geocode(setting, function (results, status) {
-            if (status === 'OK') {
-                resolve(results[0].formatted_address);
-            } else {
-                reject(status);
-            }
-        });
-    });
-}
-
+// A simple logging function;
 function grab(val) {
     console.log(val);
 }
 
-function throwOut(val) {
-    console.log('so wrong ' + val);
+function throwOut(value) {
+    console.log('so wrong ' + value);
 }
-
-
-
-
