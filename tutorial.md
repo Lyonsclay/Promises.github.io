@@ -1,6 +1,10 @@
 ####[EcmaScript6](https://people.mozilla.org/~jorendorff/es6-draft.htm) introduces a native Promises spec which "promises" to make asynchronous chaining much simpler.
 
+<<<<<<< HEAD
 Promises are a new pattern to handle asynchronous JavaScript functions. They provide a way of chaining multiple asynchronous functions that allows these functions to operate sequentially and pass values. This means that each function will wait for the previous function to pass a value before operating.
+=======
+[Promises](http://en.wikipedia.org/wiki/Futures_and_promises) are a pattern to handle asynchronous JavaScript functions. They provide a way of chaining multiple asynchronous functions that allows these functions to operate sequentially and pass values. This means that each function will wait for the previous function to pass a value before operating.
+>>>>>>> gh-pages
 
 Despite the simplicity of the Promise pattern I've found that the numerous explanations and tutorials on the web are typically insufficient for fully grasping the concept. One of the failings I have observed is the general attempt to learn Javascript patterns by using contrived examples.
 
@@ -84,7 +88,7 @@ function setGlobal() {
 
 Either way it is declared a global variable refers to a variable in the [global execution context](http://www.ecma-international.org/ecma-262/5.1/#sec-10.2.3) which means that all functions declared in the immediate scope and it's descendants have access to a global variable.
 
-Creating global variables is usually discouraged, because it pollutes the global namespace. A better way of capturing a value in the global scope is to create an object in the global space and storing that value in the object. Or one can avoid the global context by placing all code inside a function body. That way the scope of variables on the top level is shielded from the global context and only the function name if one is given will reside in the global name space.
+Creating global variables is usually discouraged, because it pollutes the global namespace. A better way of capturing a value in the global scope is to create a global object to store variables in. Another way is to avoid the global context altogether by placing code inside a function body. This insures the scope of variables on the top level is shielded from the global context and only the function name, if one is given, will reside in the global name space.
 
 To chain asynchronous functions together they have to be nested so that they are forced to operate in sequence. Passing variables to a nested function works because all functions declared inside an outer function have access to the outer function's variables. Checkout [scope](http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/) for more information on how variables are accessed in JavaScript functions.
 
@@ -185,7 +189,7 @@ According to the [Promises A+]() specification the `then` method receives two ar
 
 The term **thenable** refers to an object or function that has a `then` method. This is the most essential characteristic of a Promise and is what allows for Promises of different libraries to interact. There is some speculation that JavaScript asynchronous functions that are currently using the Callback pattern will be adapted to the Promise pattern.
 
-So what if you want to further extend the `then` chain and pass a value to another function? A simple way to do this is to add a return statement which shares a value down the chain.
+What if you want to further extend the `then` chain and pass a value to another function? A simple way to do this is to add a return statement which shares a value down the chain.
 
 ```javascript
 function fail(value) {
@@ -240,7 +244,7 @@ HTML5 has a native function [getCurrentPosition](https://developer.mozilla.org/e
 
 In order to use this service from your locally hosted code you have to be running a server, which is why I include the `simple_server.rb` in the [code](https://github.com/Lyonsclay/Promises-Promises.git) for this tutorial. This [Stack Overflow]((http://stackoverflow.com/a/5431823)) post offers other server options if you prefer. Running a server is also important for using the Google Maps API in the [Reverse Geocoding](#reverse_geocoding) chapter.
 
-In order to get location data from a device we use the asynchronous method `getCurrentPosition` which is called on the `navigator.geolocation` object and takes two callbacks `success` and `error`. [Callbacks](http://javascriptissexy.com/understand-javascript-callback-functions-and-use-them/) are functions that you define and will get passed into a host function in order to be called after some operations.
+To retrieve location data from a device we use the asynchronous method `getCurrentPosition` which is called on the `navigator.geolocation` object and takes two callbacks `success` and `error`. [Callbacks](http://javascriptissexy.com/understand-javascript-callback-functions-and-use-them/) are functions that you define and will get passed into a host function in order to be called after some operations.
 
 The Callback pattern is perhaps the most widely used design for asynchronous code. The essential mechanism of passing a function as another functions parameter is the fundamental way to interact with events that are non blocking. In fact, the first argument of [setTimeout](#asynchronous_code) can be considered a callback function for all intensive purposes. What's different is that `getCurrentPosition` takes an optional second callback, `error`, which is triggered if `getCurrentPosition` can't get geolocation data for the device it is running on.
 
