@@ -2,12 +2,20 @@
 	color: #d9b026;
 	color: #cc7d35;
 	color: #859a6e;
-
 	border-radius: 10px;
 	/*overflow: hidden;*/
 	box-shadow: 5px 3px 3px 15px #e7e7e7;
 	overflow-wrap: break-word;
 	background: #3c4036;
+	background: #1a3c3b;
+}
+
+.highlight.highlight-html pre {
+	color: #859a6e;
+	border-radius: 10px;
+	/*overflow: hidden;*/
+	box-shadow: 5px 3px 3px 15px #e7e7e7;
+	overflow-wrap: break-word;
 	background: #1a3c3b;
 }
 
