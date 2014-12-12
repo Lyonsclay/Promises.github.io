@@ -296,6 +296,15 @@ p {
   margin-bottom: 20px;
 }
 
+p.indent {
+  padding-left: 15px;
+  padding-right: 20px;
+  font-size: 14px;
+  border-left: 1px solid #444143;
+  margin-left: 10px;
+  font-weight: bold;
+}
+
 a {
   text-decoration: none;
 }
