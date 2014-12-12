@@ -367,7 +367,7 @@ For the sake of producing a physcial address we need not go any further.
 geoLocate().then(getCoordinates).then(reverseGeocode);
 ```
 
-But,     for the sake of demonstration let's turn `reverseGeocode` into a Promise. To do this we will pass `results` to the `resolve` function and `status` to the `reject` function.
+But, for the sake of demonstration let's turn `reverseGeocode` into a Promise. To do this we will pass `results` to the `resolve` function and `status` to the `reject` function.
 
 ```javascript
 function getAddress(points) {
