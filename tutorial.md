@@ -1,6 +1,6 @@
 ####[EcmaScript6](https://people.mozilla.org/~jorendorff/es6-draft.htm) introduces a native Promises spec which "promises" to make asynchronous chaining much simpler.
 
-[Promises](http://en.wikipedia.org/wiki/Futures_and_promises) are a pattern to handle asynchronous JavaScript functions. They provide a way of chaining multiple asynchronous functions that allows these functions to operate sequentially and pass values. This means that each function will wait for the previous function to pass a value before operating.
+[Promises](http://en.wikipedia.org/wiki/Futures_and_promises) are a pattern that handles asynchronous JavaScript functions. They provide a way of chaining multiple asynchronous functions that allows these functions to operate sequentially and pass values. This means that each function will wait for the previous function to pass a value before operating.
 
 Despite the simplicity of the Promise pattern I've found that the numerous explanations and tutorials on the web are typically insufficient for fully grasping the concept. One of the failings I have observed is the general attempt to learn Javascript patterns by using contrived examples.
 
