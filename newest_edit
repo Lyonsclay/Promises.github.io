@@ -1,0 +1,96 @@
+diff --git a/tutorial.md b/tutorial.md
+index 7703ed3..0c35d16 100644
+--- a/tutorial.md
++++ b/tutorial.md
+@@ -1,6 +1,6 @@
+ ####[EcmaScript6](https://people.mozilla.org/~jorendorff/es6-draft.htm) introduces a native Promises spec which "promises" to make asynchronous chaining much simpler.
+
+-[Promises](http://en.wikipedia.org/wiki/Futures_and_promises) are a pattern that handles asynchronous JavaScript functions. They provide a way of chaining multiple asynchronous functions that allows these functions to operate sequentially and pass values. This means that each function will wait for the previous function to pass a value before operating.
++[Promises](http://en.wikipedia.org/wiki/Futures_and_promises) are a pattern that handles asynchronous JavaScript functions. They provide a way of chaining multiple asynchronous functions in a manner that allows them to operate sequentially and pass values down the chain. This means that each function will wait for the previous function to complete operation before executing it's statements.
+
+ Despite the simplicity of the Promise pattern I've found that the numerous explanations and tutorials on the web are typically insufficient for fully grasping the concept. One of the failings I have observed is the general attempt to learn Javascript patterns by using contrived examples.
+
+@@ -47,7 +47,7 @@ You might recall that synchronous functions can be chained together so that the
+
+ Now we'll look at [setTimeout](https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers.setTimeout) as an example of an asynchronous function. `setTimeout` runs the code contained within it after a delay specified in milliseconds.
+
+-One challenge with asynchronous functions is that you can't capture the output directly with a return statement as you would in a synchronous function. The return statement has to operate immediately because variable assignment happens immediately, or at least synchronously, in order to capture an output value.
++One challenge with asynchronous functions is that you can't capture the output directly with a return statement as you would in a synchronous function. The return statement has to operate immediately because variable assignment happens immediately( or at least synchronously) otherwise it could not capture an output value because it would look for a value before it was released and report back empty.
+
+ ```javascript
+ var async = setTimeout(function () {
+@@ -82,11 +82,11 @@ function setGlobal() {
+ }
+ ```
+
+-Either way it is declared a global variable refers to a variable in the [global execution context](http://www.ecma-international.org/ecma-262/5.1/#sec-10.2.3) which means that all functions declared in the immediate scope and it's descendants have access to a global variable.
++Either way it is declared a global variable refers to a variable in the [global environment](http://www.ecma-international.org/ecma-262/5.1/#sec-10.2.3). The implication of this is that functions declared in the global execution context and it's descendants have access to all global variables.
+
+-Creating global variables is usually discouraged, because it pollutes the global namespace. A better way of capturing a value in the global scope is to create a global object to store variables in. Another way is to avoid the global context altogether by placing code inside a function body. This insures the scope of variables on the top level is shielded from the global context and only the function name, if one is given, will reside in the global name space.
++Creating global variables is usually discouraged, because it pollutes the global namespace. A better way of capturing a value in the global scope is to create a global object to store variables in. Another way is to avoid the global context altogether by placing code inside a function body. This insures the scope of the variables on the top level is shielded from the global context and only the function name, if one is given, will reside in the global name space.
+
+-To chain asynchronous functions together they have to be nested so that they are forced to operate in sequence. Passing variables to a nested function works because all functions declared inside an outer function have access to the outer function's variables. Checkout [scope](http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/) for more information on how variables are accessed in JavaScript functions.
++To chain asynchronous functions together they have to be nested so that they are forced to operate in sequence. Once they are nested, they can share variables in a descending fashion because all inner functions have access to it's outer function's variables. Checkout [scope](http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/) for more information on how variables are accessed in JavaScript functions.
+
+ ```javascript
+ function chains() {
+@@ -104,7 +104,7 @@ function chains() {
+
+ The execution of each nested asynchronous function is contingent upon the completion of an event called by the outer function that encompasses it. In the above case that event is a delay of 700 milliseconds. As with any function the code encapsulated executes sequentially. By nesting a function we wait for the outer function to complete before executing the lines of code in the inner function.
+
+-Regardless of whether a function is synchronous or asynchronous nesting forces the operation of subsequent functions to occur sequentially. This means that the values getting passed are not the final computed values that the asynchronous functions will eventually give.
++Regardless of whether a function is synchronous or asynchronous nesting forces the operation of subsequent functions to occur sequentially. This means that the values getting passed by the `return` statement are not the final computed values that the asynchronous functions will eventually give.
+
+ ```javascript
+ var breakable = chains();
+@@ -242,7 +242,7 @@ In order to use this service from your locally hosted code you have to be runnin
+
+ To retrieve location data from a device we use the asynchronous method `getCurrentPosition` which is called on the `navigator.geolocation` object and takes two callbacks `success` and `error`. [Callbacks](http://javascriptissexy.com/understand-javascript-callback-functions-and-use-them/) are functions that you define and will get passed into a host function in order to be called after some operations.
+
+-The Callback pattern is perhaps the most widely used design for asynchronous code. The essential mechanism of passing a function as another functions parameter is the fundamental way to interact with events that are non blocking. In fact, the first argument of [setTimeout](#asynchronous_code) can be considered a callback function for all intensive purposes. What's different is that `getCurrentPosition` takes an optional second callback, `error`, which is triggered if `getCurrentPosition` can't get geolocation data for the device it is running on.
++The Callback pattern is perhaps the most widely used design for asynchronous code. The essential mechanism of passing a function as another function's parameter is the fundamental way to interact with events that are non blocking. In fact, the first argument of [setTimeout](#asynchronous_code) can be considered a callback function for all intensive purposes. What's different is that `getCurrentPosition` takes an optional second callback, `error`, which is triggered if `getCurrentPosition` can't get geolocation data for the device it is running on.
+
+ ```javascript
+ navigator.geolocation.getCurrentPosition(success, error, options)
+@@ -296,13 +296,13 @@ function geoLocate() {
+
+ The way `getCurrentPosition` works is to pass a current Geoposition object to the success function if everything goes well and if not it will pass an error message to the error function.
+
+-To see this work we need to set a variable equal to `geoLocate()` that we can call up after the Promise has resolved.
++To see this work we need to set a variable equal to `geoLocate()` that we can access after the Promise has resolved.
+
+ ```javascript
+ var where = geoLocate();
+ ```
+
+-If you wait a few moments and type `where` you will hopefully see that it has resolved to a Geoposition object. `geoLocate` is not so useful by itself so let's make a Promise that produces the latitude and longitude points from a Geoposition object.
++If you wait a few moments and type `where` you will hopefully see that it has resolved to a Geoposition object. `geoLocate` is not so useful by itself so let's make a Promise generator that produces the latitude and longitude points from a Geoposition object.
+
+ ```javascript
+ function getCoordinates(position) {
+@@ -341,7 +341,7 @@ To start with you have to include the script that contains the Google Maps Javas
+ <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+ ```
+
+-The Google Maps API performs many services which we are only using a small portion of. I say this because the code uses large messy objects, but it is free and well maintained by Google.
++The Google Maps API performs many services which we are only using a small portion of. I say this because the code uses large messy objects, but it's still worth using because it's free and well maintained by Google.
+
+ Here is a simple function that takes an array containing latitude and longitude and retrieves the corresponding physical address which it then logs to the console.
+
+@@ -367,7 +367,7 @@ For the sake of producing a physcial address we need not go any further.
+ geoLocate().then(getCoordinates).then(reverseGeocode);
+ ```
+
+-But, for the sake of demonstration let's turn `reverseGeocode` into a Promise. To do this we will pass `results` to the `resolve` function and `status` to the `reject` function.
++But, for the sake of demonstration let's turn `reverseGeocode` into a Promise generator. To do this we will pass `results` to the `resolve` function and `status` to the `reject` function.
+
+ ```javascript
+ function getAddress(points) {
+@@ -392,6 +392,6 @@ Now we can partake in the fruit of our labor and find out where exactly in the p
+ geoLocate().then(getCoordinates).then(getAddress).then(grab, throwOut);
+ ```
+
+-If all worked out you will get something close to the current address your are occupying.
++If all worked out you will get something close to the current address you are occupying.
+
+ Yeaahh!

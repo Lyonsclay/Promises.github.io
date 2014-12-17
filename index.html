@@ -38,7 +38,7 @@
 
 <p></p>
 
-<p><a href="http://en.wikipedia.org/wiki/Futures_and_promises">Promises</a> are a pattern that handles asynchronous JavaScript functions. They provide a way of chaining multiple asynchronous functions that allows these functions to operate sequentially and pass values. This means that each function will wait for the previous function to pass a value before operating.</p>
+<p>A <a href="http://en.wikipedia.org/wiki/Futures_and_promises">Promise</a> is an object that is a placeholder for a future value. Promises provide a way of chaining multiple asynchronous functions in a manner that allows them to operate sequentially and pass values down the chain. This means that each function contained in a promise pipeline will wait for the previous function to complete operation before executing it's statements.</p>
 
 <p>Despite the simplicity of the Promise pattern I've found that the numerous explanations and tutorials on the web are typically insufficient for fully grasping the concept. One of the failings I have observed is the general attempt to learn Javascript patterns by using contrived examples.</p>
 
@@ -87,7 +87,7 @@
 
 <p>Now we'll look at <a href="https://developer.mozilla.org/en-US/docs/Web/API/WindowTimers.setTimeout">setTimeout</a> as an example of an asynchronous function. <code>setTimeout</code> runs the code contained within it after a delay specified in milliseconds.</p>
 
-<p>One challenge with asynchronous functions is that you can't capture the output directly with a return statement as you would in a synchronous function. The return statement has to operate immediately because variable assignment happens immediately, or at least synchronously, in order to capture an output value.</p>
+<p>One challenge with asynchronous functions is that you can't capture the output directly with a return statement as you would in a synchronous function. The return statement has to operate immediately because variable assignment happens immediately( or at least synchronously) otherwise it could not capture an output value because it would look for a value before it was released and report back empty.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="pl-s">var</span> async <span class="pl-k">=</span> <span class="pl-s3">setTimeout</span>(<span class="pl-st">function</span> () {
     <span class="pl-en">console</span><span class="pl-s3">.log</span>(<span class="pl-s1"><span class="pl-pds">'</span>stay classy<span class="pl-pds">'</span></span>);
@@ -110,17 +110,17 @@
 <span class="pl-c">// Result depends on when deffered is accessed.</span>
 deffered <span class="pl-k">===</span> <span class="pl-s1"><span class="pl-pds">'</span>captured value<span class="pl-pds">'</span></span>;</pre></div>
 
-<p>The <a href="http://stackoverflow.com/questions/4862193/javascript-global-variables">global variable</a> can also be set inside a function. Here's more information on the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window">window</a> object.</p>
+<p>The <a href="http://stackoverflow.com/questions/4862193/javascript-global-variables">global variable</a> can also be set inside a function using the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window">window</a> object.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="pl-st">function</span> <span class="pl-en">setGlobal</span>() {
     <span class="pl-s3">window</span>.greeting <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">'</span>namaste<span class="pl-pds">'</span></span>;
 }</pre></div>
 
-<p>Either way it is declared a global variable refers to a variable in the <a href="http://www.ecma-international.org/ecma-262/5.1/#sec-10.2.3">global execution context</a> which means that all functions declared in the immediate scope and it's descendants have access to a global variable.</p>
+<p>Either way it is declared a global variable refers to a variable in the <a href="http://www.ecma-international.org/ecma-262/5.1/#sec-10.2.3">global environment</a>. The implication of this is that functions declared in the global execution context and it's descendants have access to all global variables.</p>
 
-<p class="indent">Creating global variables is usually discouraged, because it pollutes the global namespace. A better way of capturing a value in the global scope is to create a global object to store variables in. Another way is to avoid the global context altogether by placing code inside a function body. This insures the scope of variables on the top level is shielded from the global context and only the function name, if one is given, will reside in the global name space.</p>
+<p class="indent">Creating global variables is usually discouraged, because it pollutes the global namespace. A better way of capturing a value in the global scope is to create a global object to store variables in. Another way is to avoid the global context altogether by placing code inside a function body. This insures the scope of the variables on the top level is shielded from the global context and only the function name, if one is given, will reside in the global name space.</p>
 
-<p>To chain asynchronous functions together they have to be nested so that they are forced to operate in sequence. Passing variables to a nested function works because all functions declared inside an outer function have access to the outer function's variables. Checkout <a href="http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/">scope</a> for more information on how variables are accessed in JavaScript functions.</p>
+<p>To chain asynchronous functions together they have to be nested so that they are forced to operate in sequence. Once they are nested, they can share variables in a descending fashion because all inner functions have access to their outer function's variables. Checkout <a href="http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/">scope</a> for more information on how variables are accessed in JavaScript functions.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="pl-st">function</span> <span class="pl-en">chains</span>() {
     <span class="pl-s">var</span> arcane <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">'</span>chains<span class="pl-pds">'</span></span>;
@@ -134,9 +134,9 @@ deffered <span class="pl-k">===</span> <span class="pl-s1"><span class="pl-pds">
     <span class="pl-k">return</span> arcane;
 }</pre></div>
 
-<p>The execution of each nested asynchronous function is contingent upon the completion of an event called by the outer function that encompasses it. In the above case that event is a delay of 700 milliseconds. As with any function the code encapsulated executes sequentially. By nesting a function we wait for the outer function to complete before executing the lines of code in the inner function.</p>
+<p>The execution of each nested asynchronous function is contingent upon the completion of an event called by the outer function that encompasses it. In the above case that event is a delay of 700 milliseconds. As with any function the code encapsulated executes sequentially. By nesting a function we wait for the outer function to complete before executing the lines of code in the inner function. This forces the succesive functions to execute sequentially even if they contain asynchronous operations.</p>
 
-<p>Regardless of whether a function is synchronous or asynchronous nesting forces the operation of subsequent functions to occur sequentially. This means that the values getting passed are not the final computed values that the asynchronous functions will eventually give.</p>
+<p>While we can force operation of a series of asynchronous operatios to occur sequentially, we can't force a <code>return</code> statement to wait for any asynchronous functions to complete before returning a value. In a nested sequence the value that is passed by the <code>return</code> statement is not the final computed value that the asynchronous function will eventually give.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="pl-s">var</span> breakable <span class="pl-k">=</span> chains();
 
@@ -259,7 +259,7 @@ evenOdds().then(gotcha);</pre></div>
 
 <p>To retrieve location data from a device we use the asynchronous method <code>getCurrentPosition</code> which is called on the <code>navigator.geolocation</code> object and takes two callbacks <code>success</code> and <code>error</code>. <a href="http://javascriptissexy.com/understand-javascript-callback-functions-and-use-them/">Callbacks</a> are functions that you define and will get passed into a host function in order to be called after some operations.</p>
 
-<p>The Callback pattern is perhaps the most widely used design for asynchronous code. The essential mechanism of passing a function as another functions parameter is the fundamental way to interact with events that are non blocking. In fact, the first argument of <a href="#asynchronous_code">setTimeout</a> can be considered a callback function for all intensive purposes. What's different is that <code>getCurrentPosition</code> takes an optional second callback, <code>error</code>, which is triggered if <code>getCurrentPosition</code> can't get geolocation data for the device it is running on.</p>
+<p>The Callback pattern is perhaps the most widely used design for asynchronous code. The essential mechanism of passing a function as another function's parameter is the fundamental way to interact with events that are non blocking. In fact, the first argument of <a href="#asynchronous_code">setTimeout</a> can be considered a callback function for all intensive purposes. What's different is that <code>getCurrentPosition</code> takes an optional second callback, <code>error</code>, which is triggered if <code>getCurrentPosition</code> can't get geolocation data for the device it is running on.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="pl-s3">navigator</span>.geolocation.getCurrentPosition(success, error, options)</pre></div>
 
@@ -306,11 +306,11 @@ evenOdds().then(gotcha);</pre></div>
 
 <p>The way <code>getCurrentPosition</code> works is to pass a current Geoposition object to the success function if everything goes well and if not it will pass an error message to the error function.</p>
 
-<p>To see this work we need to set a variable equal to <code>geoLocate()</code> that we can call up after the Promise has resolved. </p>
+<p>To see this work we need to set a variable equal to <code>geoLocate()</code> that we can access after the Promise has resolved.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="pl-s">var</span> where <span class="pl-k">=</span> geoLocate();</pre></div>
 
-<p>If you wait a few moments and type <code>where</code> you will hopefully see that it has resolved to a Geoposition object. <code>geoLocate</code> is not so useful by itself so let's make a Promise that produces the latitude and longitude points from a Geoposition object.</p>
+<p>If you wait a few moments and type <code>where</code> you will hopefully see that it has resolved to a Geoposition object. <code>geoLocate</code> is not so useful by itself so let's make a Promise generator that produces the latitude and longitude points from a Geoposition object.</p>
 
 <div class="highlight highlight-javascript"><pre><span class="pl-st">function</span> <span class="pl-en">getCoordinates</span>(<span class="pl-vpf">position</span>) {
     <span class="pl-k">return</span> <span class="pl-k">new</span> <span class="pl-en">Promise</span>(<span class="pl-st">function</span> (<span class="pl-vpf">resolve</span>, <span class="pl-vpf">reject</span>) {
@@ -344,7 +344,7 @@ geoLocate().then(getCoordinates).then(grab, throwOut);</pre></div>
 
 <div class="highlight highlight-html"><pre>&lt;<span class="pl-ent">script</span> <span class="pl-e">type</span>=<span class="pl-s1"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span> <span class="pl-e">src</span>=<span class="pl-s1"><span class="pl-pds">"</span>https://maps.googleapis.com/maps/api/js?sensor=false<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;</pre></div>
 
-<p>The Google Maps API performs many services which we are only using a small portion of. I say this because the code uses large messy objects, but it is free and well maintained by Google.</p>
+<p>The Google Maps API performs many services which we are only using a small portion of. I say this because the code uses large messy objects, but it is still worth using because it's free and well maintained by Google.</p>
 
 <p>Here is a simple function that takes an array containing latitude and longitude and retrieves the corresponding physical address which it then logs to the console. </p>
 
@@ -362,7 +362,7 @@ geoLocate().then(getCoordinates).then(grab, throwOut);</pre></div>
     });
 }</pre></div>
 
-<p>For the sake of producing a physcial address we need not go any further.</p>
+<p>But, for the sake of demonstration let's turn <code>reverseGeocode</code> into a Promise generator. To do this we will pass <code>results</code> to the <code>resolve</code> function and <code>status</code> to the <code>reject</code> function.</p>
 
 <div class="highlight highlight-javascript"><pre>geoLocate().then(getCoordinates).then(reverseGeocode);</pre></div>
 
@@ -387,7 +387,7 @@ geoLocate().then(getCoordinates).then(grab, throwOut);</pre></div>
 
 <div class="highlight highlight-javascript"><pre>geoLocate().then(getCoordinates).then(getAddress).then(grab, throwOut);</pre></div>
 
-<p>If all worked out you will get something close to the current address your are occupying.</p>
+<p>If all worked out you will get something close to the current address you are occupying.</p>
 
 <p>Yeaahh!</p>
         </section>
